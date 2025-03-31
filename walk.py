@@ -2,7 +2,7 @@
 
 # Authors: Andy Wendler, Ondřej Všelko
 # Created: 11. 3. 2025
-# Last edited: 12. 3. 2025
+# Last edited: 31. 3. 2025
 
 
 # test at techtower
@@ -11,5 +11,10 @@
 # the dog will walk straight for a distance
 # params:
 #   dist - distance to walk
-def straightWalk(dist):
-    print("I'm walking")
+def straightWalk(point):
+    print("I'm walking to " + str(point))
+
+def walkToCoordinates(x, y):
+    straightWalk(x)
+    straightWalk(y)
+    print("I'm here")
