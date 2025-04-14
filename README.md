@@ -1,6 +1,8 @@
 # Dogsteska
 
-Dogsteska je projekt zaměřený na vývoj autonomního systému pro navigaci psa v prostoru, detekci překážek a skenování lístků pomocí kamery. Tento projekt je vyvíjen na modelu Unitree Go2
+Dogsteska je projekt zaměřený na vývoj autonomního systému pro navigaci psa v prostoru, detekci překážek a skenování lístků pomocí kamery. Tento projekt je vyvíjen na modelu Unitree Go2¨
+
+![Dogstestka](images/Picture1.png)
 
 ## Funkcionality
 
