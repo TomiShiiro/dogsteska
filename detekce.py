@@ -4,9 +4,6 @@ from enum import Enum
 from unitree_sdk2py.core.channel import ChannelSubscriber, ChannelFactoryInitialize
 from unitree_sdk2py.go2.sport.sport_client import SportClient
 from unitree_sdk2py.go2.obstacles_avoid.obstacles_avoid_client import ObstaclesAvoidClient
-from unitree_sdk2py.go2.image.image_client import ImageClient
-from unitree_sdk2py.go2.image.camera_handle import CameraHandle
-from unitree_sdk2py.go2.sensor.scan_client import ScanClient
 
 # Constants for obstacle detection
 MIN_DISTANCE = 0.5          # Minimum distance to consider as obstacle (meters)
@@ -61,16 +58,17 @@ class ObstacleDetector:
         self.sport_client.SetTimeout(10.0)
         self.sport_client.Init()
 
-        if detection_mode in [DetectionMode.LIDAR, DetectionMode.HYBRID]:
-            self.scan_client = ScanClient()
-            self.scan_client.SetTimeout(3.0)
-            self.scan_client.Init()
+        # GARBAGE
+        # if detection_mode in [DetectionMode.LIDAR, DetectionMode.HYBRID]:
+        #     self.scan_client = ScanClient()
+        #     self.scan_client.SetTimeout(3.0)
+        #     self.scan_client.Init()
 
-        if detection_mode in [DetectionMode.CAMERA, DetectionMode.HYBRID]:
-            self.image_client = ImageClient()
-            self.image_client.SetTimeout(3.0)
-            self.image_client.Init()
-            self.camera_handle = CameraHandle.FRONT
+        # if detection_mode in [DetectionMode.CAMERA, DetectionMode.HYBRID]:
+        #     self.image_client = ImageClient()
+        #     self.image_client.SetTimeout(3.0)
+        #     self.image_client.Init()
+        #     self.camera_handle = CameraHandle.FRONT
 
         # Initialize obstacle avoidance client
         self.avoid_client = ObstaclesAvoidClient()
@@ -78,6 +76,8 @@ class ObstacleDetector:
         self.avoid_client.Init()
         
         print("Obstacle Detector initialized")
+        
+    
 
 def demo_obstacle_detection(network_interface=None):
     """Demonstrate obstacle detection capabilities"""
