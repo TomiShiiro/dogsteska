@@ -8,10 +8,16 @@ from detekce import ObstacleDetector
 from unitree_sdk2py.go2.video.video_client import VideoClient
 from queue import Queue
 
+class Map:
+    def __init__(self):
+        pass        
+    def GetPosition(self):
+        pass
+
 class Dogsteska:
     def __init__(self, network_interface=None):
         self.avoidance = ObstacleDetector(network_interface).avoid_client
-        self.map = None #TODO mapa, systém koordinace
+        self.map = Map() #TODO mapa, systém koordinace
         self.start_position = self.map.GetPosition()
         
         self.avoidance.SwitchSet(True) # turn on obstacle detection
@@ -64,35 +70,45 @@ class Dogsteska:
 
         return None
     async def video_stream_thread(self):
-        while True:
-            frame = await self.GetFrame()
-            
-            if(frame is None):
-                await asyncio.sleep(0.01)
-                continue
+        try:
+            while True:
+                frame = self.GetFrame()
                 
-            self.frame_queue.put(frame)
+                if(frame is None):
+                    await asyncio.sleep(0.01)
+                    continue
+                    
+                self.frame_queue.put(frame)
+        except Exception as e:
+            print("Error in Video thread")
+            print(e)
     
     async def dogsteska_control_thread(self):
-        await self.ReturnToStart() # Start from default position
+        try:
+            await self.ReturnToStart() # Start from default position
             
-        while True:         
-            code = None
-            while not code:
-                code = await self.ScanCode()
-                pass  
-            
-            await self.GetToDestination(code)
-            await self.ReturnToStart()
+            while True:         
+                code = None
+                while not code:
+                    code = await self.ScanCode()
+                    pass  
+                
+                await self.GetToDestination(code)
+                await self.ReturnToStart()
+        except Exception as e:
+            print("Error in Control thread")
+            print(e)
 
-async def main():    
+def main():    
+    print("Initializing main")
     if len(sys.argv) < 2:
         dogsteska = Dogsteska() 
     else:
         dogsteska = Dogsteska(sys.argv[1]) 
     
-    control_task = asyncio.create_task(dogsteska.dogsteska_control_thread())
-    video_task = asyncio.create_task(dogsteska.video_stream_thread())
+    print("Initializing threads")
+    control_task = asyncio.to_thread(dogsteska.dogsteska_control_thread())
+    video_task = asyncio.to_thread(dogsteska.video_stream_thread())
     
     try:
         while True:
@@ -100,15 +116,17 @@ async def main():
                 frame = dogsteska.frame_queue.get()
                 cv2.imshow('Video Stream', frame)
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(1) == ord('q'):
+                print("User is quitting")
                 break
-
-            await asyncio.sleep(0.01)  # Let the loop breathe a bit
+    except Exception as e:
+        print("Error in main thread")
+        print(e)
     finally:
-        control_task.cancel()
-        video_task.cancel()
-        await asyncio.gather(control_task, video_task, return_exceptions=True)
+        print("Shutting down")
+        control_task.close()
+        video_task.close()
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
