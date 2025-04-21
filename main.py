@@ -10,12 +10,6 @@ from queue import Queue
 
 qcd = cv2.QRCodeDetector()
 
-class Map:
-    def __init__(self):
-        pass        
-    def GetPosition(self):
-        pass
-
 class Destination:
     """ 
         Args:
@@ -31,6 +25,12 @@ class Destination:
     def __str__(self):
         return f"x = {self.x}m/s | y = {self.y}m/s | angular velocity = {self.yaw}rad/s"
 
+
+class Map:
+    def __init__(self):
+        pass        
+    def GetPosition(self) -> Destination:
+        pass
 
 
 class Dogsteska:
@@ -63,15 +63,13 @@ class Dogsteska:
         self.avoidance.UseRemoteCommandFromApi(False)
         
         
-    async def GetToDestination(self, code:tuple[float, float, float]):
-        x, y, yaw = code
-        self.Move(x, y, yaw)
+    async def GetToDestination(self, dest:Destination):        
+        self.Move(dest.x, dest.y, dest.yaw)
         
     async def ReturnToStart(self):
-        x, y, yaw = self.start_position
-        self.Move(x, y, yaw)
+        self.GetToDestination(self.start_position)
 
-    async def ScanCode(self) -> tuple[float, float, float]:
+    async def ScanCode(self) -> Destination:
         frame = None
         while frame is None:
             frame = self.frame_queue.get()
@@ -85,7 +83,16 @@ class Dogsteska:
         
         realInfo = filter(lambda x: x is not None and x != "", decoded_info)
         for info in realInfo:
-            parts = info.split(",")
+            try:
+                parts = info.split(",")
+                if len(parts) != 3:
+                    continue
+                
+                destinace = Destination(float(parts[0]), float(parts[1]),float(parts[2]))
+                
+                return destinace
+            except Exception as e:
+                pass
                     
         return None
     
@@ -126,8 +133,12 @@ class Dogsteska:
                     code = await self.ScanCode()
                     pass  
                 print("We've found a code, get ready to explore")
+                await asyncio.sleep(3)
                 
                 await self.GetToDestination(code)
+                
+                await asyncio.sleep(15)
+                
                 await self.ReturnToStart()
         except Exception as e:
             print("Error in Control thread")
