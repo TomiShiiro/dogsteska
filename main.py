@@ -16,6 +16,23 @@ class Map:
     def GetPosition(self):
         pass
 
+class Destination:
+    """ 
+        Args:
+        - x: Body x-direction speed command, limited to -1.5~+1.5(m/s);
+        - y: Body y-direction speed command, limited to -1~+1(m/s);
+        - yaw: Body yaw angular velocity command, limited to -1.57~+1.57(rad/s).
+    """
+    def __init__(self, x: float, y:float, yaw:float):
+        self.x = x
+        self.y = y
+        self.yaw = yaw
+
+    def __str__(self):
+        return f"x = {self.x}m/s | y = {self.y}m/s | angular velocity = {self.yaw}rad/s"
+
+
+
 class Dogsteska:
     def __init__(self, network_interface=None):
         self.avoidance = ObstacleDetector(network_interface).avoid_client
