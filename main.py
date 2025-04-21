@@ -8,6 +8,8 @@ from detekce import ObstacleDetector
 from unitree_sdk2py.go2.video.video_client import VideoClient
 from queue import Queue
 
+qcd = cv2.QRCodeDetector()
+
 class Map:
     def __init__(self):
         pass        
@@ -53,8 +55,22 @@ class Dogsteska:
         self.Move(x, y, yaw)
 
     async def ScanCode(self) -> tuple[float, float, float]:
-        #TODO vrátí x, y, yaw podle custom mapy? 
-        return (0, 0, 0)
+        frame = None
+        while frame is None:
+            frame = self.frame_queue.get()
+            
+            if(frame is None):
+                await asyncio.sleep(0.01)          
+        
+        retval, decoded_info, points, straight_qrcode = qcd.detectAndDecodeMulti(frame)  
+        if retval == False:
+            return None
+        
+        realInfo = filter(lambda x: x is not None and x != "", decoded_info)
+        for info in realInfo:
+            parts = info.split(",")
+                    
+        return None
     
     def GetFrame(self):
         code, data = self.video_client.GetImageSample()
@@ -92,6 +108,7 @@ class Dogsteska:
                 while not code:
                     code = await self.ScanCode()
                     pass  
+                print("We've found a code, get ready to explore")
                 
                 await self.GetToDestination(code)
                 await self.ReturnToStart()
